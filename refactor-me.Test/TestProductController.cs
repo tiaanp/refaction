@@ -5,22 +5,26 @@ using refactor_me.Domain.Repository;
 using System.Linq;
 using System.Threading.Tasks;
 using refactor_me.Domain.Models;
+using refactor_me.Validators;
+using refactor_me.Models;
+using System.Net.Http;
 
 namespace refactor_me.Test
 {
     [TestClass]
     public class TestProductController
     {
-        Product _Product;
+        ProductDTO _Product;
         [TestMethod]
         public void Product()
         {
-            var refactorMeProvider = new RefactorMeProvider();
 
+            var refactorMeProvider = new RefactorMeProvider();
+             
             var controller = new ProductsController(refactorMeProvider);
 
             //Adding A Product to DB
-            var product = controller.Create(new Domain.Models.Product
+            var product = controller.Create(new ProductDTO
             {
                 Name = "Samsung Galaxy S7",
                 Description = "Newest mobile product from Samsung.",
@@ -28,7 +32,9 @@ namespace refactor_me.Test
                 DeliveryPrice = 16.99m,
             });
 
-            _Product = product;
+           
+
+            // _Product = (ProductDTO)product;
 
             GetAll();
             Update();
