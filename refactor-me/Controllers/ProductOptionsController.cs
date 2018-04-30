@@ -7,6 +7,9 @@ using System.Web.Http;
 using refactor_me.Domain.Contracts;
 using refactor_me.Domain.Models;
 using System.Threading.Tasks;
+using refactor_me.Models;
+using refactor_me.Validators;
+using FluentValidation.WebApi;
 
 namespace refactor_me.Controllers
 {
@@ -47,17 +50,55 @@ namespace refactor_me.Controllers
 
         [method:
              HttpPost,
-             AllowAnonymous ]
-        public void Create(ProductOption option)
-            => base._RefactorMeProvider
-                            .ProductOptions.AddAsync(option);
+             AllowAnonymous]
+        public ProductOptionDTO Create(ProductOptionDTO option)
+        {
+            var productOptionValidator = new ProductOptionValidator();
+            var results = productOptionValidator.Validate(option);
+
+            if (!results.IsValid)
+            {
+                results.AddToModelState(ModelState, "ProductOption");
+            }
+
+
+            var dto = new ProductOption
+            {
+                Description = option.Description,
+                Name = option.Name,
+                ProductId = option.ProductId
+            };
+            base._RefactorMeProvider
+                          .ProductOptions.AddAsync(dto);
+            option.Id = dto.Id;
+            return option;
+        }
+
 
         [method:
              HttpPut,
              AllowAnonymous]
-        public void Update(ProductOption option)
-        =>  base._RefactorMeProvider
-                            .ProductOptions.Edit(option);
+        public void Update(ProductOptionDTO option)
+        {
+            var productOptionValidator = new ProductOptionValidator();
+            var results = productOptionValidator.Validate(option);
+
+            if (!results.IsValid)
+            {
+                results.AddToModelState(ModelState, "ProductOption");
+            }
+
+
+            var dto = new ProductOption
+            {
+                Description = option.Description,
+                Name = option.Name,
+                ProductId = option.ProductId
+            };
+
+            base._RefactorMeProvider
+                              .ProductOptions.Edit(dto);
+        }
 
         [method:
              HttpDelete,

@@ -17,6 +17,7 @@ namespace refactor_me.Exception
 
         public override void OnException(HttpActionExecutedContext actionExecutedContext)
         {
+            //Impliment Server side logging
             base.OnException(actionExecutedContext);
         }
     }

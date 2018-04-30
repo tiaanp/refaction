@@ -2,6 +2,7 @@
 using Microsoft.Owin.Security.OAuth;
 using Owin;
 using refactor_me.Domain.Repository;
+using refactor_me.Models;
 using refactor_me.Token;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace refactor_me
 
 
             HttpConfiguration config = new HttpConfiguration();
-
+           // Helpers.NewConnection();
             ConfigureOAuth(app);
 
             WebApiConfig.Register(config);

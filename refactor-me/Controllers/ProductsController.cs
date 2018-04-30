@@ -9,10 +9,13 @@ using System.Collections.Generic;
 using System.Linq;
 using refactor_me.Infrastructure.Extentions;
 using System.Net.Http;
+using refactor_me.Models;
+using refactor_me.Validators;
+using FluentValidation.WebApi;
 
 namespace refactor_me.Controllers
 {
-    [Route("api/[controller]/[action]"), 
+    [Route("api/[controller]/[action]"),
      AllowAnonymous]
     public class ProductsController : BaseController
     {
@@ -27,7 +30,7 @@ namespace refactor_me.Controllers
         public async Task<IEnumerable<Product>> GetAll()
             => await base._RefactorMeProvider.Products.GetAllAsync();
 
-        [method: 
+        [method:
             HttpGet,
             AllowAnonymous]
         public async Task<IEnumerable<Product>> SearchByName(string name)
@@ -39,27 +42,65 @@ namespace refactor_me.Controllers
         public async Task<Product> GetProduct(Guid id)
             => await base._RefactorMeProvider.Products.GetEntityAsync(product => product.Id == id);
 
-        [method: 
+        [method:
             HttpPost,
              AllowAnonymous]
-        public  Product Create(Product product)
+        public ProductDTO Create(ProductDTO product)
         {
-            if(product.Name.IsNullOrEmpty())
+            var productValidator = new ProductValidator();
+            var results = productValidator.Validate(product);
+
+            var dto = new Product
             {
+                DeliveryPrice = product.DeliveryPrice,
+                Price = product.Price,
+                Description = product.Description,
+                Id = product.Id,
+                Name = product.Name,
+
+            };
+
+            if (!results.IsValid)
+            {
+                
+                results.AddToModelState(ModelState, "Product");
+                
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, ModelState));
             }
-            base._RefactorMeProvider.Products.Add(product);
+            base._RefactorMeProvider.Products.Add(dto);
 
-            return  product;
+            product.Id = dto.Id;
+            return product;
         }
 
-        [method: 
+        [method:
              HttpPut,
              AllowAnonymous]
-        public  void Update(Product product)
-             =>  base._RefactorMeProvider.Products.Edit(product);
+        public void Update(ProductDTO product)
+        {
+            var productValidator = new ProductValidator();
+            var results = productValidator.Validate(product);
 
-        [method: 
+            if (!results.IsValid)
+            {
+                results.AddToModelState(ModelState, "Product");
+                //throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound, ModelState));
+            }
+            var dto = new Product
+            {
+                DeliveryPrice = product.DeliveryPrice,
+                Price = product.Price,
+                Description = product.Description,
+                Id = product.Id,
+                Name = product.Name,
+
+            };
+
+            base._RefactorMeProvider.Products.Edit(dto);
+        }
+
+
+        [method:
              HttpDelete,
              AllowAnonymous]
         public void Delete(Guid id)
